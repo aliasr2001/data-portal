@@ -1,0 +1,289 @@
+.instagram-login-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #fafafa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #262626;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.instagram-login-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 350px;
+}
+
+/* Card layout */
+.instagram-card {
+  background-color: #ffffff;
+  border: 1px solid #dbdbdb;
+  border-radius: 1px;
+  padding: 10px 40px 30px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+/* Logo styling */
+.instagram-logo-header {
+  margin: 36px 0 12px 0;
+  display: flex;
+  justify-content: center;
+  width: 175px;
+  height: 51px;
+}
+
+.instagram-logo-header svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Back button */
+.instagram-back-btn {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: #0095f6;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin: 10px 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.instagram-back-btn:hover {
+  color: #00376b;
+}
+
+/* Form inputs */
+.instagram-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+}
+
+.instagram-input-group {
+  margin-bottom: 6px;
+  width: 100%;
+  position: relative;
+}
+
+.instagram-input {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #fafafa;
+  border: 1px solid #dbdbdb;
+  border-radius: 3px;
+  font-size: 12px;
+  padding: 9px 8px 7px 8px;
+  color: #262626;
+  outline: none;
+  transition: border-color 0.1s ease;
+}
+
+.instagram-input:focus {
+  border-color: #a8a8a8;
+}
+
+/* Button style */
+.instagram-login-btn {
+  background-color: #0095f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 7px 9px;
+  cursor: pointer;
+  margin-top: 8px;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+.instagram-login-btn:hover:not(:disabled) {
+  background-color: #1877f2;
+}
+
+.instagram-login-btn:disabled {
+  background-color: rgba(0, 149, 246, 0.3);
+  cursor: default;
+}
+
+/* Error message */
+.instagram-error-msg {
+  color: #ed4956;
+  font-size: 14px;
+  text-align: center;
+  margin: 14px 0;
+  line-height: 1.4;
+}
+
+/* Divider (OR) */
+.instagram-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 16px 0 18px 0;
+}
+
+.instagram-divider::before,
+.instagram-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: #dbdbdb;
+}
+
+.instagram-divider span {
+  color: #8e8e8e;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 18px;
+  text-transform: uppercase;
+}
+
+/* Facebook login option */
+.instagram-fb-login {
+  background: none;
+  border: none;
+  color: #385185;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 0;
+}
+
+.instagram-fb-login svg {
+  fill: #385185;
+}
+
+.instagram-fb-login:hover {
+  color: #1877f2;
+}
+
+/* Forgot password link */
+.instagram-forgot-pwd {
+  color: #00376b;
+  font-size: 12px;
+  text-decoration: none;
+  text-align: center;
+  margin-top: 12px;
+}
+
+.instagram-forgot-pwd:hover {
+  text-decoration: underline;
+}
+
+/* Secondary Sign Up Card */
+.instagram-signup-card {
+  background-color: #ffffff;
+  border: 1px solid #dbdbdb;
+  border-radius: 1px;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.instagram-signup-card p {
+  margin: 0;
+}
+
+.instagram-signup-link {
+  color: #0095f6;
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 4px;
+}
+
+.instagram-signup-link:hover {
+  text-decoration: underline;
+}
+
+/* Get App Store section */
+.instagram-get-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.instagram-get-app p {
+  margin: 0 0 10px 0;
+}
+
+.instagram-badges {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.instagram-badge-img {
+  height: 40px;
+  cursor: pointer;
+}
+
+/* Footer layout */
+.instagram-footer {
+  margin-top: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 12px;
+  color: #8e8e8e;
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  gap: 16px;
+}
+
+.instagram-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px 20px;
+}
+
+.instagram-footer-links a {
+  color: #8e8e8e;
+  text-decoration: none;
+}
+
+.instagram-footer-links a:hover {
+  text-decoration: underline;
+}
+
+.instagram-footer-copyright {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.instagram-footer-copyright select {
+  border: none;
+  background: none;
+  color: #8e8e8e;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
