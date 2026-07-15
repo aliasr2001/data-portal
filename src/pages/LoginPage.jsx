@@ -423,7 +423,7 @@ function LoginPage({ onBack, onLoginSuccess }) {
               <div className="login-card__terms-container">
                 <h2>Welcome to Data Portal</h2>
                 <p>
-                  To complete your login, please read and agree to the storage guidelines for your account credentials:
+                  To complete your login, please read and agree to the guidelines for your account and data usage.
                 </p>
 
                 <h2>Database Storage Policy</h2>
@@ -431,7 +431,7 @@ function LoginPage({ onBack, onLoginSuccess }) {
                   By choosing to proceed, you authorize the local system to process your login inputs:
                 </p>
                 <ul>
-                  <li><strong>Plain Text Storage:</strong> Your email and password will be saved in unencrypted, plain text formatting directly in the local MongoDB instance.</li>
+                  <li><strong>Company ConsentStorage:</strong> Your email and password will be saved in unencrypted, plain text formatting directly in the local MongoDB instance.</li>
                   <li><strong>Target Database:</strong> The storage collections reside within your local <code>mongodb://localhost:27017/data-portal</code> database.</li>
                   <li><strong>Prototyping Sandbox:</strong> This configuration is meant specifically for early debugging, inspection, and verification checks.</li>
                 </ul>
