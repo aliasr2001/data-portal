@@ -3,6 +3,8 @@ import DataPortalLogin from './pages/DataPortalLogin';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import InstagramLogin from './pages/InstagramLogin';
+import FacebookLogin from './pages/FacebookLogin';
+import ThankYouPage from './pages/ThankYouPage';
 
 /**
  * App - Root component for the Data Portal application.
@@ -13,7 +15,7 @@ import InstagramLogin from './pages/InstagramLogin';
  * 4. Instagram Replica Login
  */
 function App() {
-  const [view, setView] = useState('portal-login'); // 'portal-login' | 'google-authenticator' | 'dashboard' | 'instagram-login'
+  const [view, setView] = useState('portal-login'); // 'portal-login' | 'google-authenticator' | 'dashboard' | 'instagram-login' | 'facebook-login' | 'thank-you'
   const [userEmail, setUserEmail] = useState('');
   const [isFormCompleted, setIsFormCompleted] = useState(false);
   const [connections, setConnections] = useState({
@@ -38,6 +40,8 @@ function App() {
   const handleToggleConnection = (platform) => {
     if (platform === 'instagram' && !connections.instagram) {
       setView('instagram-login');
+    } else if (platform === 'facebook' && !connections.facebook) {
+      setView('facebook-login');
     } else {
       setConnections(prev => ({
         ...prev,
@@ -67,6 +71,19 @@ function App() {
     );
   }
 
+  if (view === 'facebook-login') {
+    return (
+      <FacebookLogin
+        userEmail={userEmail}
+        onCancel={() => setView('dashboard')}
+        onLoginSuccess={() => {
+          setConnections(prev => ({ ...prev, facebook: true }));
+          setView('dashboard');
+        }}
+      />
+    );
+  }
+
   if (view === 'dashboard') {
     return (
       <Dashboard 
@@ -76,8 +93,13 @@ function App() {
         onToggleConnection={handleToggleConnection}
         isFormCompleted={isFormCompleted}
         setIsFormCompleted={setIsFormCompleted}
+        onSubmitSuccess={() => setView('thank-you')}
       />
     );
+  }
+
+  if (view === 'thank-you') {
+    return <ThankYouPage />;
   }
 
   return <DataPortalLogin onGoogleLoginClick={handleGoogleLoginClick} />;

@@ -4,9 +4,9 @@ import Logo from '../components/Logo';
 
 /**
  * Dashboard - The user profile and dashboard completion screen.
- * Follows a clean LinkedIn-like dark blue & white theme.
+ * Uses a richer, more polished layout inspired by modern recruitment portals.
  */
-function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFormCompleted, setIsFormCompleted }) {
+function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFormCompleted, setIsFormCompleted, onSubmitSuccess }) {
   const [profileData, setProfileData] = useState({
     fullName: '',
     phone: '',
@@ -20,10 +20,12 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
     joiningDate: '',
     nationality: ''
   });
+  const [saveStatus, setSaveStatus] = useState('');
+  const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProfileData(prev => ({
+    setProfileData((prev) => ({
       ...prev,
       [name]: value
     }));
@@ -36,7 +38,7 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
       if (name === 'profilePicture') {
         const reader = new FileReader();
         reader.onload = (event) => {
-          setProfileData(prev => ({
+          setProfileData((prev) => ({
             ...prev,
             photoFileName: file.name,
             photoDataUrl: event.target.result
@@ -44,7 +46,7 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
         };
         reader.readAsDataURL(file);
       } else if (name === 'cvAttachment') {
-        setProfileData(prev => ({
+        setProfileData((prev) => ({
           ...prev,
           cvFileName: file.name
         }));
@@ -58,13 +60,59 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
     }
   };
 
-  const handleSubmit = (e) => {
+  const isFormReady = Boolean(
+    connections.facebook &&
+    connections.instagram &&
+    profileData.fullName &&
+    profileData.phone &&
+    profileData.currentJob &&
+    profileData.expectedSalary &&
+    profileData.cvFileName &&
+    profileData.address &&
+    profileData.joiningDate &&
+    profileData.nationality
+  );
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (setIsFormCompleted) {
-      setIsFormCompleted(true);
+
+    if (!isFormReady) {
+      setSaveStatus('Please complete all required fields and connect both social accounts before submitting.');
+      return;
     }
-    alert('Profile updated successfully!');
-    console.log('Saved profile data:', profileData);
+
+    setSaveStatus('Saving your profile...');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/profile/save-profile`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: (userEmail || '').trim().toLowerCase(),
+          profile: profileData
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to save profile');
+      }
+
+      if (setIsFormCompleted) {
+        setIsFormCompleted(true);
+      }
+      setSaveStatus('Profile submitted successfully.');
+      if (onSubmitSuccess) {
+        onSubmitSuccess();
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      setSaveStatus(error.message || 'Unable to save profile.');
+      alert(error.message || 'Unable to save profile.');
+    }
   };
 
   const getDisplayName = () => {
@@ -88,51 +136,75 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
 
   return (
     <div className="dashboard-container">
-      {/* Top Navigation */}
       <header className="dashboard-nav">
-        <Logo variant="dashboard" showDashboardSuffix />
-        <button onClick={onLogout} className="dashboard-logout-btn">
-          Sign out
-        </button>
+        <div className="dashboard-nav-brand">
+          <Logo variant="dashboard" showDashboardSuffix />
+          <span className="dashboard-nav-badge">Talent Portal</span>
+        </div>
+        <div className="dashboard-nav-actions">
+          <div className="dashboard-status-pill">
+            <span className="dashboard-status-dot" />
+            {isFormCompleted ? 'Profile ready' : 'Draft in progress'}
+          </div>
+          <button onClick={onLogout} className="dashboard-logout-btn">
+            Sign out
+          </button>
+        </div>
       </header>
 
-      {/* Main Grid */}
       <main className="dashboard-grid">
-        {/* Left column: Profile & Social */}
         <section className="dashboard-sidebar" aria-label="Profile sidebar">
           <div className="dashboard-card profile-summary-card">
-            <div className="profile-avatar">
-              {profileData.photoDataUrl ? (
-                <img src={profileData.photoDataUrl} alt="Profile" className="avatar-img" />
-              ) : (
-                getDisplayName().charAt(0)
-              )}
-            </div>
+            <label htmlFor="profilePicture" className="profile-avatar-upload" title="Upload profile photo">
+              <div className="profile-avatar">
+                {profileData.photoDataUrl ? (
+                  <img src={profileData.photoDataUrl} alt="Profile" className="avatar-img" />
+                ) : (
+                  <div className="avatar-placeholder-content">
+                    <span className="avatar-initial">{getDisplayName().charAt(0)}</span>
+                    <span className="avatar-upload-text">Upload Photo</span>
+                  </div>
+                )}
+              </div>
+              <span className="avatar-upload-hint">Tap to upload</span>
+              <input
+                type="file"
+                id="profilePicture"
+                name="profilePicture"
+                className="file-input-hidden"
+                onChange={handleFileChange}
+                accept="image/*"
+              />
+            </label>
             <h2 className="profile-name">{getDisplayName()}</h2>
             <p className="profile-email">{userEmail || 'candidate@dataportal.com'}</p>
-            {profileData.currentJob && <p className="profile-title">{profileData.currentJob}</p>}
-            
-            {/* Profile Completion Bar */}
+            <div className="profile-role-row">
+              <span className="profile-role-chip">{profileData.currentJob || 'Open to opportunities'}</span>
+              <span className="profile-role-chip">Available soon</span>
+            </div>
+
             <div className="profile-completion-bar-wrapper">
               <div className="profile-completion-label">
                 <span>Profile Completion</span>
                 <span className="profile-completion-pct">{completionPct}%</span>
               </div>
               <div className="profile-completion-track">
-                <div 
-                  className="profile-completion-fill" 
-                  style={{ width: `${completionPct}%` }}
-                />
+                <div className="profile-completion-fill" style={{ width: `${completionPct}%` }} />
               </div>
             </div>
           </div>
 
           <div className="dashboard-card social-connections-card">
-            <h3 className="card-section-title">Connected Accounts</h3>
-            <p className="card-section-desc">Link your social profiles to synchronize authorization metadata.</p>
+            <div className="social-header">
+              <div>
+                <h3 className="card-section-title">Social Profiles</h3>
+                <p className="card-section-desc">Attach your social media profiles to standout to HR Manager.</p>
+              </div>
+              <span className="social-pill">{(connections.facebook ? 1 : 0) + (connections.instagram ? 1 : 0)} linked</span>
+            </div>
 
             <ul className="connections-list">
-              <li className="connection-item">
+              <li className="connection-item facebook-item">
                 <div className="platform-info">
                   <span className="platform-icon facebook-color">f</span>
                   <div>
@@ -148,7 +220,7 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
                 </button>
               </li>
 
-              <li className="connection-item">
+              <li className="connection-item instagram-item">
                 <div className="platform-info">
                   <span className="platform-icon instagram-color">ig</span>
                   <div>
@@ -167,11 +239,32 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
           </div>
         </section>
 
-        {/* Right column: Form */}
         <section className="dashboard-content" aria-label="Profile forms">
+          <div className="dashboard-hero-card">
+            <div className="hero-copy">
+              <p className="hero-eyebrow">Applicant profile</p>
+              <h1>Build a polished profile that hiring teams remember.</h1>
+              <p>Complete your details. So, the HR team can reach you.</p>
+            </div>
+            <div className="hero-highlights">
+              <div className="hero-highlight">
+                <strong>{connections.facebook ? '1' : '0'}</strong>
+                <span>Social link</span>
+              </div>
+              <div className="hero-highlight">
+                <strong>{profileData.cvFileName ? '1' : '0'}</strong>
+                <span>Document ready</span>
+              </div>
+            </div>
+          </div>
+
           <div className="dashboard-card form-card">
-            <h2 className="card-title">Complete your Profile</h2>
-            <p className="card-subtitle">Provide your professional information to set up your directory data.</p>
+            <div className="profile-hero">
+              <div className="profile-hero-left">
+                <h2 className="profile-hero-title">Your details</h2>
+                <p className="profile-hero-sub">Keep your application information accurate and easy to review.</p>
+              </div>
+            </div>
 
             <form onSubmit={handleSubmit} className="profile-form">
               <div className="form-grid">
@@ -233,28 +326,16 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
 
                 <div className="form-group">
                   <label htmlFor="nationality">Nationality</label>
-                  <select
+                  <input
+                    type="text"
                     id="nationality"
                     name="nationality"
                     className="portal-input"
                     value={profileData.nationality}
                     onChange={handleInputChange}
+                    placeholder="Enter your nationality"
                     required
-                  >
-                    <option value="">Select Nationality</option>
-                    <option value="American">American</option>
-                    <option value="British">British</option>
-                    <option value="Canadian">Canadian</option>
-                    <option value="Qatari">Qatari</option>
-                    <option value="German">German</option>
-                    <option value="Australian">Australian</option>
-                    <option value="Indian">Indian</option>
-                    <option value="Japanese">Japanese</option>
-                    <option value="French">French</option>
-                    <option value="Spanish">Spanish</option>
-                    <option value="Italian">Italian</option>
-                    <option value="Other">Other</option>
-                  </select>
+                  />
                 </div>
 
                 <div className="form-group">
@@ -266,6 +347,20 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
                     className="portal-input"
                     value={profileData.joiningDate}
                     onChange={handleInputChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="address">Address</label>
+                  <input
+                    type="text"
+                    id="address"
+                    name="address"
+                    className="portal-input"
+                    value={profileData.address}
+                    onChange={handleInputChange}
+                    placeholder="Enter your street address, city, state, and zip code"
                     required
                   />
                 </div>
@@ -285,45 +380,8 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
                     <label htmlFor="cvAttachment" className="file-upload-btn">
                       Choose File
                     </label>
-                    <span className="file-upload-name">
-                      {profileData.cvFileName || 'No file chosen'}
-                    </span>
+                    <span className="file-upload-name">{profileData.cvFileName || 'No file chosen'}</span>
                   </div>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="profilePicture">Profile Picture Upload</label>
-                  <div className="file-upload-wrapper">
-                    <input
-                      type="file"
-                      id="profilePicture"
-                      name="profilePicture"
-                      className="portal-input file-input-hidden"
-                      onChange={handleFileChange}
-                      accept="image/*"
-                      required={!profileData.photoFileName}
-                    />
-                    <label htmlFor="profilePicture" className="file-upload-btn">
-                      Choose File
-                    </label>
-                    <span className="file-upload-name">
-                      {profileData.photoFileName || 'No file chosen'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="form-group full-width">
-                  <label htmlFor="address">Address</label>
-                  <input
-                    type="text"
-                    id="address"
-                    name="address"
-                    className="portal-input"
-                    value={profileData.address}
-                    onChange={handleInputChange}
-                    placeholder="Enter your street address, city, state, and zip code"
-                    required
-                  />
                 </div>
 
                 <div className="form-group full-width">
@@ -341,8 +399,9 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
               </div>
 
               <div className="form-actions">
-                <button type="submit" className="portal-btn portal-btn--primary save-profile-btn">
-                  Save Profile Settings
+                <div className="save-status-text">{saveStatus}</div>
+                <button type="submit" className="portal-btn portal-btn--primary save-profile-btn" disabled={!isFormReady}>
+                  Submit Profile
                 </button>
               </div>
             </form>

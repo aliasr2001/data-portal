@@ -1,0 +1,58 @@
+.thank-you-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(180deg, #f7f9fc 0%, #eef4ff 100%);
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.thank-you-card {
+  width: min(100%, 560px);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 40px 32px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
+  text-align: center;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.thank-you-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.thank-you-icon {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.22);
+}
+
+.thank-you-icon svg {
+  width: 44px;
+  height: 44px;
+  stroke: white;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.thank-you-card h1 {
+  font-size: 28px;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+
+.thank-you-card p {
+  font-size: 16px;
+  color: #64748b;
+  line-height: 1.6;
+}

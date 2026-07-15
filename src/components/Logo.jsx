@@ -31,7 +31,7 @@ export default function Logo({ variant = 'default', showDashboardSuffix = false 
   return (
     <div className={containerClass}>
       <LogoIcon className={iconClass} />
-      <span>DataPortal{showDashboardSuffix ? ' Dashboard' : ''}</span>
+      <span>GreetHR{showDashboardSuffix ? ' Portal' : ''}</span>
     </div>
   );
 }
