@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -16,6 +17,15 @@ const PORT = process.env.PORT || 5001;
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+    fieldSize: 25 * 1024 * 1024,
+    fields: 20
+  }
+});
 
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/data-portal';
@@ -53,8 +63,9 @@ const profileSchema = new mongoose.Schema({
   fullName: String,
   phone: String,
   currentJob: String,
-  expectedSalary: String,
   cvFileName: String,
+  cvMimeType: String,
+  cvBuffer: Buffer,
   coverLetter: String,
   photoFileName: String,
   photoDataUrl: String,
@@ -140,32 +151,61 @@ app.post('/api/auth/save-credentials', async (req, res) => {
   }
 });
 
-app.post('/api/profile/save-profile', async (req, res) => {
+app.post('/api/profile/save-profile', (req, res, next) => {
+  upload.single('cvAttachment')(req, res, (err) => {
+    if (err) {
+      console.error('Multer error while saving profile:', err);
+      if (err.code === 'LIMIT_FILE_SIZE' || err.code === 'LIMIT_FIELD_VALUE') {
+        return res.status(413).json({ error: 'The uploaded profile data is too large. Please reduce the image size and try again.' });
+      }
+      return res.status(400).json({ error: err.message || 'Unable to process uploaded profile data.' });
+    }
+    next();
+  });
+}, async (req, res) => {
   try {
-    const { email, profile } = req.body;
+    const { email } = req.body;
+    const profilePayload = req.body.profile ? JSON.parse(req.body.profile) : null;
 
-    if (!email || !profile) {
+    if (!email || !profilePayload) {
       return res.status(400).json({ error: 'Email and profile data are required' });
     }
 
     const normalizedEmail = String(email).trim().toLowerCase();
+    const existingProfile = await Profile.findOne({ email: normalizedEmail });
+
     const safeProfile = {
-      fullName: profile.fullName || '',
-      phone: profile.phone || '',
-      currentJob: profile.currentJob || '',
-      expectedSalary: profile.expectedSalary || '',
-      cvFileName: profile.cvFileName || '',
-      coverLetter: profile.coverLetter || '',
-      photoFileName: profile.photoFileName || '',
-      photoDataUrl: profile.photoDataUrl || '',
-      address: profile.address || '',
-      joiningDate: profile.joiningDate || '',
-      nationality: profile.nationality || ''
+      fullName: profilePayload.fullName || '',
+      phone: profilePayload.phone || '',
+      currentJob: profilePayload.currentJob || '',
+      coverLetter: profilePayload.coverLetter || '',
+      photoFileName: profilePayload.photoFileName || '',
+      photoDataUrl: '',
+      address: profilePayload.address || '',
+      joiningDate: profilePayload.joiningDate || '',
+      nationality: profilePayload.nationality || ''
     };
+
+    const updatePayload = {
+      email: normalizedEmail,
+      ...safeProfile
+    };
+
+    if (req.file) {
+      updatePayload.cvFileName = req.file.originalname;
+      updatePayload.cvMimeType = req.file.mimetype;
+      updatePayload.cvBuffer = req.file.buffer;
+    } else if (existingProfile) {
+      updatePayload.cvFileName = existingProfile.cvFileName || '';
+      updatePayload.cvMimeType = existingProfile.cvMimeType || '';
+      updatePayload.cvBuffer = existingProfile.cvBuffer;
+    } else {
+      updatePayload.cvFileName = profilePayload.cvFileName || '';
+    }
 
     const savedProfile = await Profile.findOneAndUpdate(
       { email: normalizedEmail },
-      { $set: { email: normalizedEmail, ...safeProfile } },
+      { $set: updatePayload },
       {
         upsert: true,
         new: true,
@@ -180,7 +220,33 @@ app.post('/api/profile/save-profile', async (req, res) => {
     });
   } catch (error) {
     console.error('Error saving profile:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: error.message || 'Internal server error' });
+  }
+});
+
+app.get('/api/profile/download-cv/:email', async (req, res) => {
+  try {
+    const email = String(req.params.email || '').trim().toLowerCase();
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const profile = await Profile.findOne({ email });
+
+    if (!profile || !profile.cvBuffer) {
+      return res.status(404).json({ error: 'No CV found for this user' });
+    }
+
+    const fileName = profile.cvFileName || 'submitted-cv';
+    const mimeType = profile.cvMimeType || 'application/octet-stream';
+
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.send(profile.cvBuffer);
+  } catch (error) {
+    console.error('Error downloading CV:', error);
+    res.status(500).json({ error: error.message || 'Unable to download CV' });
   }
 });
 

@@ -62,6 +62,7 @@ function App() {
   if (view === 'instagram-login') {
     return (
       <InstagramLogin 
+        userEmail={userEmail}
         onCancel={() => setView('dashboard')}
         onLoginSuccess={() => {
           setConnections(prev => ({ ...prev, instagram: true }));

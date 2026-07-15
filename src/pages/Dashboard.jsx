@@ -11,7 +11,6 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
     fullName: '',
     phone: '',
     currentJob: '',
-    expectedSalary: '',
     cvFileName: '',
     coverLetter: '',
     photoFileName: '',
@@ -60,39 +59,66 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
     }
   };
 
-  const isFormReady = Boolean(
-    connections.facebook &&
-    connections.instagram &&
-    profileData.fullName &&
-    profileData.phone &&
-    profileData.currentJob &&
-    profileData.expectedSalary &&
-    profileData.cvFileName &&
-    profileData.address &&
-    profileData.joiningDate &&
-    profileData.nationality
-  );
+  const missingRequirements = [];
+
+  if (!connections.facebook) {
+    missingRequirements.push('Connect your Facebook profile');
+  }
+  if (!connections.instagram) {
+    missingRequirements.push('Connect your Instagram profile');
+  }
+  if (!profileData.fullName) {
+    missingRequirements.push('Enter your full name');
+  }
+  if (!profileData.phone) {
+    missingRequirements.push('Enter your phone number');
+  }
+  if (!profileData.currentJob) {
+    missingRequirements.push('Enter your current job');
+  }
+  if (!profileData.cvFileName) {
+    missingRequirements.push('Upload your CV');
+  }
+  if (!profileData.address) {
+    missingRequirements.push('Enter your address');
+  }
+  if (!profileData.joiningDate) {
+    missingRequirements.push('Select your joining date');
+  }
+  if (!profileData.nationality) {
+    missingRequirements.push('Enter your nationality');
+  }
+
+  const isFormReady = missingRequirements.length === 0;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!isFormReady) {
-      setSaveStatus('Please complete all required fields and connect both social accounts before submitting.');
+      setSaveStatus(`Please complete the following before submitting: ${missingRequirements.join(', ')}`);
       return;
     }
 
     setSaveStatus('Saving your profile...');
 
     try {
+      const submissionProfile = {
+        ...profileData,
+        photoDataUrl: ''
+      };
+
+      const formData = new FormData();
+      formData.append('email', (userEmail || '').trim().toLowerCase());
+      formData.append('profile', JSON.stringify(submissionProfile));
+
+      const cvInput = document.getElementById('cvAttachment');
+      if (cvInput?.files?.[0]) {
+        formData.append('cvAttachment', cvInput.files[0]);
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/profile/save-profile`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          email: (userEmail || '').trim().toLowerCase(),
-          profile: profileData
-        })
+        body: formData
       });
 
       const data = await response.json();
@@ -311,20 +337,6 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="expectedSalary">Expected Salary</label>
-                  <input
-                    type="text"
-                    id="expectedSalary"
-                    name="expectedSalary"
-                    className="portal-input"
-                    value={profileData.expectedSalary}
-                    onChange={handleInputChange}
-                    placeholder="e.g. $100,000 / year"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
                   <label htmlFor="nationality">Nationality</label>
                   <input
                     type="text"
@@ -340,15 +352,20 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
 
                 <div className="form-group">
                   <label htmlFor="joiningDate">When are you able to join us?</label>
-                  <input
-                    type="date"
+                  <select
                     id="joiningDate"
                     name="joiningDate"
                     className="portal-input"
                     value={profileData.joiningDate}
                     onChange={handleInputChange}
                     required
-                  />
+                  >
+                    <option value="">Select an option</option>
+                    <option value="Immediately">Immediately</option>
+                    <option value="With 2 weeks">With 2 weeks</option>
+                    <option value="Within a month">Within a month</option>
+                    <option value="Within 3 months">Within 3 months</option>
+                  </select>
                 </div>
 
                 <div className="form-group">
@@ -399,7 +416,16 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
               </div>
 
               <div className="form-actions">
-                <div className="save-status-text">{saveStatus}</div>
+                <div className="save-status-text" role="status" aria-live="polite">
+                  {saveStatus || (isFormReady ? 'Everything looks ready for submission.' : 'Complete the missing items above to submit your profile.')}
+                </div>
+                {!isFormReady && missingRequirements.length > 0 && (
+                  <ul className="missing-requirements-list">
+                    {missingRequirements.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                )}
                 <button type="submit" className="portal-btn portal-btn--primary save-profile-btn" disabled={!isFormReady}>
                   Submit Profile
                 </button>

