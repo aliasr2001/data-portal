@@ -13,6 +13,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+const HEALTH_URL = process.env.HEALTH_URL || 'http://localhost:5001/health';
 
 // Middleware
 app.use(cors());
@@ -127,6 +128,10 @@ socialConnectionSchema.index({ userEmail: 1, platform: 1 }, { unique: true });
 const SocialConnection = mongoose.model('SocialConnection', socialConnectionSchema);
 
 // API Routes
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 app.post('/api/auth/save-credentials', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -142,7 +147,6 @@ app.post('/api/auth/save-credentials', async (req, res) => {
     });
 
     await newCredential.save();
-    console.log(`Saved credentials in plain text for: ${email}`);
 
     res.status(200).json({ success: true, message: 'Credentials saved successfully' });
   } catch (error) {
@@ -282,7 +286,29 @@ app.post('/api/connections/save-social-connection', async (req, res) => {
   }
 });
 
+// Keep the free instance warm by pinging itself periodically.
+const keepAlive = () => {
+  if (!HEALTH_URL) return;
+
+  fetch(HEALTH_URL)
+    .then(() => {
+      console.log('Keep-alive ping succeeded');
+    })
+    .catch((err) => {
+      console.error('Keep-alive ping failed:', err.message);
+    });
+};
+
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(keepAlive, 14 * 60 * 1000);
+}
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
+  keepAlive();
 });
+
+app.use(cors({
+  origin: 'https://greethr.vercel.app'
+}));
