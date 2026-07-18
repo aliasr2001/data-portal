@@ -35,13 +35,14 @@ function DataPortalLogin({ onGoogleLoginClick }) {
       {/* Top Navbar */}
       <header className="portal-navbar">
         <Logo />
+        <p>By Provok</p>
       </header>
 
       {/* Main Card */}
       <main className="portal-login-main">
         <div className="portal-card">
           <h1 className="portal-card__title">Sign in</h1>
-          <p className="portal-card__subtitle">Access your data hub dashboard</p>
+          <p className="portal-card__subtitle">Access your GreetHR Portal</p>
 
           <form onSubmit={handleSubmit}>
             <div className="portal-form-group">

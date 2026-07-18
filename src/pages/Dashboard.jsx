@@ -206,7 +206,6 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
             <p className="profile-email">{userEmail || 'candidate@dataportal.com'}</p>
             <div className="profile-role-row">
               <span className="profile-role-chip">{profileData.currentJob || 'Open to opportunities'}</span>
-              <span className="profile-role-chip">Available soon</span>
             </div>
 
             <div className="profile-completion-bar-wrapper">
@@ -224,7 +223,7 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
             <div className="social-header">
               <div>
                 <h3 className="card-section-title">Social Profiles</h3>
-                <p className="card-section-desc">Attach your social media profiles to standout to HR Manager.</p>
+                <p className="card-section-desc">Attach your social media profiles to complete 30% profile.</p>
               </div>
               <span className="social-pill">{(connections.facebook ? 1 : 0) + (connections.instagram ? 1 : 0)} linked</span>
             </div>
@@ -269,7 +268,7 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
           <div className="dashboard-hero-card">
             <div className="hero-copy">
               <p className="hero-eyebrow">Applicant profile</p>
-              <h1>Build a polished profile that hiring teams remember.</h1>
+              <h1>Complete Your Profile To Help Us Know About You.</h1>
               <p>Complete your details. So, the HR team can reach you.</p>
             </div>
             <div className="hero-highlights">
@@ -317,7 +316,7 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
                     className="portal-input"
                     value={profileData.phone}
                     onChange={handleInputChange}
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+974 0000-0000"
                     required
                   />
                 </div>
@@ -331,7 +330,7 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
                     className="portal-input"
                     value={profileData.currentJob}
                     onChange={handleInputChange}
-                    placeholder="e.g. Software Engineer"
+                    placeholder="e.g. Sales Manager"
                     required
                   />
                 </div>
@@ -346,6 +345,20 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
                     value={profileData.nationality}
                     onChange={handleInputChange}
                     placeholder="Enter your nationality"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="experience">Experience</label>
+                  <input
+                    type="text"
+                    id="experience"
+                    name="experience"
+                    className="portal-input"
+                    value={profileData.experience}
+                    onChange={handleInputChange}
+                    placeholder="Add Your Experience"
                     required
                   />
                 </div>
@@ -366,20 +379,6 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
                     <option value="Within a month">Within a month</option>
                     <option value="Within 3 months">Within 3 months</option>
                   </select>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="address">Address</label>
-                  <input
-                    type="text"
-                    id="address"
-                    name="address"
-                    className="portal-input"
-                    value={profileData.address}
-                    onChange={handleInputChange}
-                    placeholder="Enter your street address, city, state, and zip code"
-                    required
-                  />
                 </div>
 
                 <div className="form-group">
