@@ -79,9 +79,6 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
   if (!profileData.cvFileName) {
     missingRequirements.push('Upload your CV');
   }
-  if (!profileData.address) {
-    missingRequirements.push('Enter your address');
-  }
   if (!profileData.joiningDate) {
     missingRequirements.push('Select your joining date');
   }
@@ -187,7 +184,7 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
                   <img src={profileData.photoDataUrl} alt="Profile" className="avatar-img" />
                 ) : (
                   <div className="avatar-placeholder-content">
-                    <span className="avatar-initial">{getDisplayName().charAt(0)}</span>
+                    {/* <span className="avatar-initial">{getDisplayName().charAt(0)}</span> */}
                     <span className="avatar-upload-text">Upload Photo</span>
                   </div>
                 )}
@@ -231,7 +228,12 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
             <ul className="connections-list">
               <li className="connection-item facebook-item">
                 <div className="platform-info">
-                  <span className="platform-icon facebook-color">f</span>
+                  <span className="platform-icon facebook-color-svg">
+                    <svg viewBox="0 0 36 36" width="38" height="38" fill="currentColor">
+                      <path fill="#1877f2" d="M20.181 35.87C29.094 34.791 36 27.202 36 18c0-9.941-8.059-18-18-18S0 8.059 0 18c0 8.442 5.811 15.526 13.652 17.471L14 34h5.5l.681 1.87Z"></path>
+                      <path fill="#ffffff" d="M13.651 35.471v-11.97H9.936V18h3.715v-2.37c0-6.127 2.772-8.964 8.784-8.964 1.138 0 3.103.223 3.91.446v4.983c-.425-.043-1.167-.065-2.081-.065-2.952 0-4.09 1.116-4.09 4.025V18h5.883l-1.008 5.5h-4.867v12.37a18.183 18.183 0 0 1-6.53-.399Z"></path>
+                    </svg>
+                  </span>
                   <div>
                     <div className="platform-name">Facebook</div>
                     <div className="platform-status">{connections.facebook ? 'Connected' : 'Not connected'}</div>
@@ -268,7 +270,7 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
           <div className="dashboard-hero-card">
             <div className="hero-copy">
               <p className="hero-eyebrow">Applicant profile</p>
-              <h1>Complete Your Profile To Help Us Know About You.</h1>
+              <h1>Complete Your Profile to Help Us Know About You.</h1>
               <p>Complete your details. So, the HR team can reach you.</p>
             </div>
             <div className="hero-highlights">
