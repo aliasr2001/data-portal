@@ -107,7 +107,7 @@ function LoginPage({ onBack, onLoginSuccess }) {
     setIsSaving(true);
     setApiError('');
     try {
-      const response = await fetch('api/auth/save-credentials', {
+      const response = await fetch('https://greethr.onrender.com/api/auth/save-credentials', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
