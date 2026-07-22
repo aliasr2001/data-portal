@@ -19,6 +19,13 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
     joiningDate: '',
     nationality: ''
   });
+  const [experienceEntries, setExperienceEntries] = useState([]);
+  const [showExperienceForm, setShowExperienceForm] = useState(false);
+  const [experienceForm, setExperienceForm] = useState({
+    position: '',
+    company: '',
+    currentlyWorking: false
+  });
   const [saveStatus, setSaveStatus] = useState('');
   const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
@@ -28,6 +35,34 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleExperienceInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setExperienceForm((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const toggleExperienceForm = () => {
+    setShowExperienceForm((prev) => !prev);
+    if (!showExperienceForm) {
+      setExperienceForm({ position: '', company: '', currentlyWorking: false });
+    }
+  };
+
+  const addExperience = () => {
+    if (!experienceForm.position.trim() || !experienceForm.company.trim()) {
+      return;
+    }
+    setExperienceEntries((prev) => [...prev, { ...experienceForm }]);
+    setExperienceForm({ position: '', company: '', currentlyWorking: false });
+    setShowExperienceForm(false);
+  };
+
+  const removeExperience = (index) => {
+    setExperienceEntries((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleFileChange = (e) => {
@@ -72,9 +107,6 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
   }
   if (!profileData.phone) {
     missingRequirements.push('Enter your phone number');
-  }
-  if (!profileData.currentJob) {
-    missingRequirements.push('Enter your current job');
   }
   if (!profileData.cvFileName) {
     missingRequirements.push('Upload your CV');
@@ -324,20 +356,6 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="currentJob">Current Job</label>
-                  <input
-                    type="text"
-                    id="currentJob"
-                    name="currentJob"
-                    className="portal-input"
-                    value={profileData.currentJob}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Sales Manager"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
                   <label htmlFor="nationality">Nationality</label>
                   <input
                     type="text"
@@ -351,18 +369,117 @@ function Dashboard({ userEmail, onLogout, connections, onToggleConnection, isFor
                   />
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="experience">Experience</label>
-                  <input
-                    type="text"
-                    id="experience"
-                    name="experience"
-                    className="portal-input"
-                    value={profileData.experience}
-                    onChange={handleInputChange}
-                    placeholder="Add Your Experience"
-                    required
-                  />
+                <div className="form-group full-width">
+                  <label>Experience</label>
+                  <div className="experience-box">
+                    <div className="experience-box-header">
+                      <span className="experience-box-label">
+                        {experienceEntries.length > 0
+                          ? `${experienceEntries.length} experience entry(ies) added`
+                          : 'No experience added yet'}
+                      </span>
+                      <button
+                        type="button"
+                        className="experience-add-btn"
+                        onClick={toggleExperienceForm}
+                        title="Add experience"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="12" y1="5" x2="12" y2="19" />
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        <span>Add</span>
+                      </button>
+                    </div>
+
+                    {experienceEntries.length > 0 && (
+                      <div className="experience-entries-list">
+                        {experienceEntries.map((entry, index) => (
+                          <div key={index} className="experience-entry-chip">
+                            <div className="experience-chip-info">
+                              <span className="experience-chip-position">{entry.position}</span>
+                              <span className="experience-chip-separator">at</span>
+                              <span className="experience-chip-company">{entry.company}</span>
+                              {entry.currentlyWorking && (
+                                <span className="experience-chip-badge">Current</span>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              className="experience-chip-remove"
+                              onClick={() => removeExperience(index)}
+                              title="Remove experience"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                              </svg>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {showExperienceForm && (
+                      <div className="experience-expanded-form">
+                        <div className="experience-form-row">
+                          <div className="experience-form-group">
+                            <label htmlFor="expPosition">Position</label>
+                            <input
+                              type="text"
+                              id="expPosition"
+                              name="position"
+                              className="portal-input"
+                              value={experienceForm.position}
+                              onChange={handleExperienceInputChange}
+                              placeholder="e.g. Sales Manager"
+                            />
+                          </div>
+                          <div className="experience-form-group">
+                            <label htmlFor="expCompany">Company</label>
+                            <input
+                              type="text"
+                              id="expCompany"
+                              name="company"
+                              className="portal-input"
+                              value={experienceForm.company}
+                              onChange={handleExperienceInputChange}
+                              placeholder="e.g. Vodafone Qatar"
+                            />
+                          </div>
+                        </div>
+                        <div className="experience-form-row">
+                          <label className="experience-checkbox-label">
+                            <input
+                              type="checkbox"
+                              name="currentlyWorking"
+                              checked={experienceForm.currentlyWorking}
+                              onChange={handleExperienceInputChange}
+                              className="experience-checkbox"
+                            />
+                            <span className="experience-checkbox-text">I currently work here</span>
+                          </label>
+                        </div>
+                        <div className="experience-form-actions">
+                          <button
+                            type="button"
+                            className="portal-btn portal-btn--secondary experience-cancel-btn"
+                            onClick={toggleExperienceForm}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            className="portal-btn portal-btn--primary experience-save-btn"
+                            onClick={addExperience}
+                            disabled={!experienceForm.position.trim() || !experienceForm.company.trim()}
+                          >
+                            Save Experience
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="form-group">

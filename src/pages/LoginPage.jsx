@@ -19,6 +19,7 @@ function LoginPage({ onBack, onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [apiError, setApiError] = useState('');
 
   const emailInputRef = useRef(null);
@@ -132,6 +133,19 @@ function LoginPage({ onBack, onLoginSuccess }) {
       setIsSaving(false);
     }
   }, [email, password, transitionTo]);
+
+  /**
+   * Handle navigation to dashboard with loading state
+   */
+  const handleGoToDashboard = useCallback(() => {
+    setIsNavigating(true);
+    // Give a brief moment to show the loading state before transitioning
+    setTimeout(() => {
+      if (onLoginSuccess) {
+        onLoginSuccess(email);
+      }
+    }, 600);
+  }, [email, onLoginSuccess]);
 
   /**
    * Go back to the email step (from the user chip or cancel).
@@ -268,11 +282,19 @@ function LoginPage({ onBack, onLoginSuccess }) {
                 </p>
                 <button
                   type="button"
-                  className="login-btn--primary"
-                  onClick={() => onLoginSuccess && onLoginSuccess(email)}
+                  className={`login-btn--primary ${isNavigating ? 'login-btn--loading' : ''}`}
+                  onClick={handleGoToDashboard}
+                  disabled={isNavigating}
                   id="dashboard-btn"
                 >
-                  Go to Dashboard
+                  {isNavigating ? (
+                    <>
+                      <span className="login-btn__spinner" />
+                      Loading...
+                    </>
+                  ) : (
+                    'Go to Dashboard'
+                  )}
                 </button>
               </div>
             )}
